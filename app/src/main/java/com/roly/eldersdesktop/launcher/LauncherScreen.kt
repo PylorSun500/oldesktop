@@ -58,12 +58,12 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
@@ -339,34 +339,53 @@ private fun StatusSummaryCard(
     onEnterManageMode: () -> Unit
 ) {
     ElevatedCard(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(76.dp),
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         )
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 16.dp),
+                .fillMaxSize()
+                .padding(6.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(
-                modifier = Modifier.weight(1f)
+            Card(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxSize(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
+                )
             ) {
-                Text(
-                    text = timeText,
-                    style = MaterialTheme.typography.displayMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(
-                    text = dateText,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 18.dp, vertical = 10.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.Start
+                ) {
+                    Text(
+                        text = timeText,
+                        style = MaterialTheme.typography.displayMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = dateText,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
-            Spacer(modifier = Modifier.size(16.dp))
+
             HoldToManageButton(
+                modifier = Modifier
+                    .height(64.dp)
+                    .widthIn(min = 82.dp),
                 isManageMode = isManageMode,
                 holdProgress = holdProgress,
                 touchSlop = touchSlop,
@@ -543,12 +562,19 @@ private fun HeroCard(
             contentAlignment = Alignment.Center
         ) {
             if (card.type == LauncherCardType.APP) {
-                AppIcon(
-                    packageName = card.packageName,
-                    contentDescription = appLabel,
-                    tint = palette.onContainer,
-                    modifier = Modifier.size(104.dp)
-                )
+                Surface(
+                    shape = RoundedCornerShape(28.dp),
+                    color = MaterialTheme.colorScheme.surfaceContainerLow
+                ) {
+                    AppIcon(
+                        packageName = card.packageName,
+                        contentDescription = appLabel,
+                        tint = palette.onContainer,
+                        modifier = Modifier
+                            .padding(20.dp)
+                            .size(88.dp)
+                    )
+                }
             } else {
                 Icon(
                     imageVector = cardHeroIcon(card.type),
@@ -1076,6 +1102,7 @@ private fun Modifier.holdToTrigger(
 
 @Composable
 private fun HoldToManageButton(
+    modifier: Modifier = Modifier,
     isManageMode: Boolean,
     holdProgress: Float,
     touchSlop: Float,
@@ -1101,9 +1128,7 @@ private fun HoldToManageButton(
     )
 
     ElevatedCard(
-        modifier = Modifier
-            .widthIn(min = 92.dp)
-            .height(68.dp)
+        modifier = modifier
             .holdToTrigger(
                 enabled = !isManageMode,
                 touchSlop = touchSlop,
@@ -1128,13 +1153,26 @@ private fun HoldToManageButton(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                Icon(
-                    imageVector = Icons.Filled.Settings,
-                    contentDescription = null,
-                    modifier = Modifier.size(22.dp),
-                    tint = contentColor
-                )
-                Spacer(modifier = Modifier.height(4.dp))
+                Box(
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Settings,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp),
+                        tint = contentColor
+                    )
+                    if (!isManageMode && holdProgress > 0f) {
+                        CircularProgressIndicator(
+                            progress = { holdProgress },
+                            modifier = Modifier.size(30.dp),
+                            strokeWidth = 2.5.dp,
+                            color = MaterialTheme.colorScheme.primary,
+                            trackColor = Color.Transparent
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(2.dp))
                 AnimatedContent(
                     targetState = isManageMode,
                     transitionSpec = { fadeIn() togetherWith fadeOut() },
@@ -1146,18 +1184,6 @@ private fun HoldToManageButton(
                         color = contentColor
                     )
                 }
-            }
-
-            if (!isManageMode && holdProgress > 0f) {
-                LinearProgressIndicator(
-                    progress = { holdProgress },
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .fillMaxWidth()
-                        .height(3.dp),
-                    color = MaterialTheme.colorScheme.primary,
-                    trackColor = Color.Transparent
-                )
             }
         }
     }
